@@ -92,8 +92,14 @@ import os
 
 
 class Routes:
-    def __init__(self, starting_path: str, debug: bool = False):
+    def __init__(self, starting_path: str, use_full_routes: bool = False, debug: bool = False):
+        """Routes object
+
+        IF use_full_routes is True, the dictionary indexes will be, the full route instead
+        of being nested.
+        """
         self.starting_path = starting_path
+        self.use_full_routes = use_full_routes
         self.debug = debug
 
         self.routes = self.get_routes()
@@ -107,8 +113,6 @@ class Routes:
     def raise_error_on_repeated_names(self, path: str):
         """If there's a repeated name raise an error
         We need indices to confirm that is not the same file"""
-        functions: dict = {}
-
         i = 0
         for f in os.listdir(path):
             f_renamed = f.replace(".py", "")
@@ -145,7 +149,11 @@ class Routes:
 
             route_location = path.replace(self.starting_path, "").replace("\\", "/")
             full_route_name = f"{route_location}/{route_name}"
-            functions[route_name] = module.Main(full_route_name)
+
+            if self.use_full_routes:
+                functions[full_route_name] = module.Main(full_route_name)
+            else:
+                functions[route_name] = module.Main(full_route_name)
 
         return functions
 
@@ -171,9 +179,18 @@ class Routes:
             if not folder == "__pycache__":
                 if debug:
                     print(f"{folder}")
-                subfunctions = self._get_routes(f"{path}{os.path.sep}{folder}",
-                                          debug=debug)
-                functions[folder] = subfunctions
+
+                if self.use_full_routes:
+                    subfunctions = self._get_routes(f"{path}{os.path.sep}{folder}",
+                                              debug=debug)
+                    functions = {
+                        **functions,
+                        **subfunctions,
+                    }
+                else:
+                    subfunctions = self._get_routes(f"{path}{os.path.sep}{folder}",
+                                              debug=debug)
+                    functions[folder] = subfunctions
 
         return functions
 

@@ -74,9 +74,19 @@ def test_dynamic_imports_routes(routes_path: str, debug: bool = False, show_outp
         out = routes.get_routes()
         print("[OK] Routes.get_routes()")
         if show_output:
-            print(out)
+            pprint.pprint(out)
     except Exception as ex:
         print("[Failed] Routes.get_routes()")
+        print("Exception: ", ex)
+
+    try:
+        routes.use_full_routes = True
+        out = routes.get_routes()
+        print("[OK] Routes.get_routes() (Using full routes as indexes)")
+        if show_output:
+            pprint.pprint(out)
+    except Exception as ex:
+        print("[Failed] Routes.get_routes() (Using full routes as indexes)")
         print("Exception: ", ex)
 
 
