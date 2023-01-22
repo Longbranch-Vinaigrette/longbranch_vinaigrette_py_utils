@@ -62,13 +62,7 @@ class LocalRepositoryManager:
             print("LocalRepositoryManager -> get_all_repos_info():")
 
         temp_list = []
-        # for user in self.users:
-        #     temp_list += [{
-        #         "user": user,
-        #         "name": name
-        #     } for name in self.get_user_repository_list(user)]
-        # If this one below works, remove the comments above
         for user in self.users:
-            temp_list += self.get_user_repository_list(user)
+            temp_list += self.get_user_repos_info(user)
 
         return temp_list
