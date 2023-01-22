@@ -2,10 +2,11 @@ import pprint
 
 from ..data_configuration import DataLocation, DBPath, LocalData
 from ..data_configuration.ProjectInfo import ProjectInfo
+from ..local_repository_manager import LocalRepositoryManager
 
 
 def test_db_paths(show_output: bool = False):
-    print("tests -> test_db_paths():")
+    print("\ntests -> test_db_paths():")
 
     try:
         out = DBPath.get_databases_path()
@@ -30,6 +31,28 @@ def test_db_paths(show_output: bool = False):
             pprint.pprint(out)
     except:
         print("[Failed] DBPath.get_databases_path_list()")
+
+
+def test_local_repository_manager(show_output: bool = False):
+    print("\ntests -> test_local_repository_manager():")
+
+    try:
+        rep_manager = LocalRepositoryManager(DataLocation.get_repositories_path(), debug=True)
+        print("[OK] LocalRepositoryManager()")
+        if show_output:
+            print(rep_manager)
+    except:
+        print("[Failed] LocalRepositoryManager()")
+        print("Cannot proceed with LocalRepositoryManager")
+        return
+
+    try:
+        out = rep_manager.get_all_repos_info()
+        print("[OK] LocalRepositoryManager.get_all_repos_info()")
+        if show_output:
+            pprint.pprint(out)
+    except:
+        print("[Failed] LocalRepositoryManager.get_all_repos_info()")
 
 
 class Tests:

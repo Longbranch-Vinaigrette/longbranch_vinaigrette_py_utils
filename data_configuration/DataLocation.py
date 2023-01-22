@@ -44,8 +44,8 @@ def get_data_path() -> str:
     return data_path
 
 
-def get_default_repositories_path(debug=False):
-    """Get default path for repositories"""
+def get_repositories_path(debug=False):
+    """Get repositories path, if it doesn't exist, returns default repository path"""
     if debug:
         print("\nDataLocation -> get_default_path():")
 
