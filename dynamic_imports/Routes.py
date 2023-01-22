@@ -150,6 +150,7 @@ class Routes:
             route_location = path.replace(self.starting_path, "").replace("\\", "/")
             full_route_name = f"{route_location}/{route_name}"
 
+            # If using routes as indexes
             if self.use_full_routes:
                 functions[full_route_name] = module.Main(full_route_name)
             else:
@@ -180,6 +181,7 @@ class Routes:
                 if debug:
                     print(f"{folder}")
 
+                # If using routes as indexes
                 if self.use_full_routes:
                     subfunctions = self._get_routes(f"{path}{os.path.sep}{folder}",
                                               debug=debug)
