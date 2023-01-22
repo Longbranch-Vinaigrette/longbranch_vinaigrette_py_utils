@@ -3,6 +3,7 @@ import pprint
 from ..data_configuration import DataLocation, DBPath, LocalData
 from ..data_configuration.ProjectInfo import ProjectInfo
 from ..local_repository_manager import LocalRepositoryManager
+from ..dynamic_imports.Routes import Routes
 
 
 def test_db_paths(show_output: bool = False):
@@ -53,6 +54,30 @@ def test_local_repository_manager(show_output: bool = False):
             pprint.pprint(out)
     except:
         print("[Failed] LocalRepositoryManager.get_all_repos_info()")
+
+
+def test_dynamic_imports_routes(routes_path: str, debug: bool = False, show_output: bool = False):
+    print("\ntests -> test_dynamic_imports_routes():")
+
+    try:
+        routes = Routes(routes_path, debug=debug)
+        print("[OK] Routes()")
+        if show_output:
+            print(routes)
+    except Exception as ex:
+        print("[Failed] Routes()")
+        print("Exception: ", ex)
+        print("Cannot proceed with Routes object")
+        return
+
+    try:
+        out = routes.get_routes()
+        print("[OK] Routes.get_routes()")
+        if show_output:
+            print(out)
+    except Exception as ex:
+        print("[Failed] Routes.get_routes()")
+        print("Exception: ", ex)
 
 
 class Tests:
