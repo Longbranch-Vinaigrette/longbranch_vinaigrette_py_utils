@@ -1,3 +1,4 @@
+"""Get important project information stored on the given app/project path"""
 import json
 import os
 
@@ -6,6 +7,7 @@ class ProjectInfo:
     info = None
 
     def __init__(self, path: str, debug=False):
+        """Get app/project information/settings data"""
         self.path = path
         self.debug = debug
 
@@ -15,6 +17,15 @@ class ProjectInfo:
         except Exception as ex:
             if self.debug:
                 print("Error: Couldn't retrieve data, ", ex)
+
+    def load_settings_data(self, key: str):
+        """Load settings data"""
+        with open(f"{self.path}{os.path.sep}settings.json", "r") as f:
+            try:
+                return json.load(f)[key]
+            except:
+                pass
+        return None
 
     def get_commands(self):
         """Get commands"""
