@@ -14,8 +14,7 @@ class LocalRepositoryManager:
         self.debug = debug
 
         if self.debug:
-            print("/src/gui/tabs/start_website/app_checkboxes"
-                  " -> LocalRepositoryManager -> __init__():")
+            print("LocalRepositoryManager -> __init__():")
         users_path = self.get_subdirectories_path(self.path)
         self.users = self.path_list_to_name_list(users_path)
 
@@ -38,8 +37,7 @@ class LocalRepositoryManager:
     def get_user_repository_list_path(self, username: str):
         """Get local repository list of a given user"""
         if self.debug:
-            print("/src/gui/tabs/start_website/app_checkboxes"
-                  " -> LocalRepositoryManager -> get_user_repository_list():")
+            print("LocalRepositoryManager -> get_user_repository_list():")
 
         user_repositories_path = f"{self.path}{os.path.sep}{username}"
         return self.get_subdirectories_path(user_repositories_path)
@@ -54,21 +52,45 @@ class LocalRepositoryManager:
         """Get user repository info"""
         return [{
                 "user": username,
-                "name": name
+                "name": name,
+                "path": f"{self.path}{os.path.sep}{username}{os.path.sep}{name}",
             } for name in self.get_user_repository_list(username)]
 
     def get_all_repos_info(self) -> list:
         """Get repositories information"""
         if self.debug:
-            print("/src/gui/tabs/start_website/app_checkboxes"
-                  " -> LocalRepositoryManager -> get_all_repos_info():")
+            print("LocalRepositoryManager -> get_all_repos_info():")
 
         temp_list = []
+        # for user in self.users:
+        #     temp_list += [{
+        #         "user": user,
+        #         "name": name
+        #     } for name in self.get_user_repository_list(user)]
         for user in self.users:
-            temp_list += [{
-                "user": user,
-                "name": name
-            } for name in self.get_user_repository_list(user)]
+            temp_list += self.get_user_repository_list(user)
 
         return temp_list
 
+    def get_local_repos_info(self):
+        """Get information about local repositories"""
+        if self.debug:
+            print("LocalRepositoryManager -> get_local_repos_info():")
+
+        # Local repository manager
+        # Manages the repositories cloned from internet
+        users: list = self.get_users()
+        result: list = []
+        for i in range(len(users)):
+            user = users[i]
+
+            # Create components
+            user_repos = self.get_user_repos_info(user)
+            result += [
+                        {
+                            **item,
+                            "start_on_boot": False,
+                        } for item in user_repos
+                    ]
+
+        return result
