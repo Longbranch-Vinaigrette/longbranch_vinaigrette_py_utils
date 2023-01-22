@@ -7,6 +7,7 @@ def get_databases_path():
     """Get the path where database/s will be stored"""
     return f"{DataLocation.get_data_path()}{os.path.sep}database"
 
+
 def get_sql_db_path(name="devtools.db"):
     """Get the path where the sql database should be stored"""
     # Path where sql dbs are stored
@@ -15,6 +16,7 @@ def get_sql_db_path(name="devtools.db"):
         os.mkdir(db_path)
 
     return f"{db_path}{os.path.sep}{name}"
+
 
 def get_databases_path_list():
     """Get databases path list

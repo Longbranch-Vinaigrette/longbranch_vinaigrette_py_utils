@@ -2,7 +2,72 @@ import json
 import copy
 
 from . import OStuff
-from src.submodules.sub_sqlite3_utils import Sqlite3Utils
+from .data_configuration import DBPath
+
+
+def load_repository_settings_data(
+        column_name: str,
+        username: str,
+        db_filename: str = "devtools.db",
+        sql_repository_settings=None,
+        debug: bool = False,
+    ):
+    """Load repository settings data
+
+    There are multiple things that must be done to load this correctly.
+    If no instance of a database is given, it creates a new one."""
+    try:
+        from ..sqlite3_utils import Sqlite3Utils
+    except:
+        print("Warning: dev_tools_utils -> load_repository_settings_data():")
+        print("sqlite3_utils submodule not found.")
+        return
+
+    if debug:
+        print("load_repository_settings_data():")
+        print(f"Column name: {column_name}")
+        print(f"username: {username}")
+
+    # If no instance of a database was given, create a new one just this once
+    if not sql_repository_settings:
+        db_path = DBPath.get_sql_db_path(db_filename)
+        sql_repository_settings = Sqlite3Utils(db_path, "repository_settings")
+
+    # This might throw an error
+    try:
+        #                                   Column
+        #                                     |          Value
+        data = sql_repository_settings.get(column_name, username)
+    except Exception:
+        return
+
+    # If there's no data return
+    if not data:
+        return
+
+    # If there's a single item in data, it will not be a list
+    # but a dictionary
+    if isinstance(data, dict):
+        return [data]
+
+    # Enabled is like this: 'enabled': '{"type": "bool", "value": false}'
+    for i in range(len(data)):
+        item = data[i]
+        try:
+            # Load enabled
+            enabled = json.loads(item["enabled"])["value"]
+
+            setup_finalized = json.loads(item["setup_finalized"])["value"]
+            if isinstance(setup_finalized, dict):
+                setup_finalized = setup_finalized["value"]
+
+            # Replace previous value in the dictionary
+            item["enabled"] = enabled
+            item["setup_finalized"] = setup_finalized
+        except Exception as err:
+            pass
+
+    return data
 
 
 def merge_data(normal_data: list, replace_for: list, key: str, debug=False) -> list:
@@ -79,64 +144,6 @@ def merge_data(normal_data: list, replace_for: list, key: str, debug=False) -> l
     # Join lists
     result += temp_list
     return result
-
-
-def load_repository_settings_data(
-        column_name: str,
-        username: str,
-        db_filename: str = "dev_gui.db",
-        sql_repository_settings: Sqlite3Utils = None,
-        debug: bool = False,
-    ):
-    """Load repository settings data
-
-    There are multiple things that must be done to load this correctly.
-    If no instance of a database is given, it creates a new one."""
-    if debug:
-        print("load_repository_settings_data():")
-        print(f"Column name: {column_name}")
-        print(f"username: {username}")
-
-    # If no instance of a database was given, create a new one just this once
-    if not sql_repository_settings:
-        db_path = OStuff.get_sql_db_path(db_filename)
-        sql_repository_settings = Sqlite3Utils(db_path, "repository_settings")
-
-    # This might throw an error
-    try:
-        #                                   Column
-        #                                     |          Value
-        data = sql_repository_settings.get(column_name, username)
-    except Exception:
-        return
-
-    # If there's no data return
-    if not data:
-        return
-
-    # If there's a single item in data, it will not be a list
-    # but a dictionary
-    if isinstance(data, dict):
-        return [data]
-
-    # Enabled is like this: 'enabled': '{"type": "bool", "value": false}'
-    for i in range(len(data)):
-        item = data[i]
-        try:
-            # Load enabled
-            enabled = json.loads(item["enabled"])["value"]
-
-            setup_finalized = json.loads(item["setup_finalized"])["value"]
-            if isinstance(setup_finalized, dict):
-                setup_finalized = setup_finalized["value"]
-
-            # Replace previous value in the dictionary
-            item["enabled"] = enabled
-            item["setup_finalized"] = setup_finalized
-        except Exception as err:
-            pass
-
-    return data
 
 
 def try_get(sql_settings_table, key_name, debug=False):
