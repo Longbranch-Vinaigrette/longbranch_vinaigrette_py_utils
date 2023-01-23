@@ -19,7 +19,7 @@ def execute_method(req: HttpRequest, obj, debug: bool = False):
         print("Request method: ", req.method)
         print("Request route: ", req.path_info)
         print("Given object route: ", obj.route)
-    
+
     if req.method == "GET":
         return obj.get(req)
     elif req.method == "POST":
@@ -71,16 +71,17 @@ class DjangoRoutes(Routes):
     def get_routes_as_urlpatterns(self):
         """Get routes Django compatible"""
         urlpatterns = []
-        print("Routes:")
-        pprint.pprint(self.routes)
+        if self.debug:
+            print("Routes:")
+            pprint.pprint(self.routes)
         lambdas = []
 
         i = 0
         for route_path in list(self.routes.keys()):
-            print("\n")
             route_instance = self.routes[route_path]
             route_name_parsed = self.parse_route_name(route_path)
             if self.debug:
+                print("\n")
                 print("Its route: ", route_instance.route)
                 print("Parsed route: ", route_name_parsed)
                 print(f"path({route_name_parsed}, {route_instance})")
