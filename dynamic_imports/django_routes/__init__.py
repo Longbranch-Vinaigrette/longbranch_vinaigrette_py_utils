@@ -87,6 +87,12 @@ class DjangoRoutes(Routes):
                 print(f"path({route_name_parsed}, {route_instance})")
 
             # TODO: I don't know why it calls the wrong object, it would be cool to fix it later.
+            # Some ideas:
+            # * Define the function here, inside the iterator, instead of being outside which
+            #   may interfere somehow with the references.
+            # * Define a class in which you bind the object from the constructor
+            #   and in the __call__ function you would receive the request to handle
+            #   appropriately.
             if self.handle_request:
                 lambdas.append(
                         lambda request: execute_method(
