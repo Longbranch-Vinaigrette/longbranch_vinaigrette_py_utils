@@ -1,7 +1,10 @@
 """
 
 Following my own standard that the files must have a class named 'Main'
-and inside that class there are functions with the http methods name in lowercase."""
+and inside that class there are functions with the http methods name in lowercase.
+
+If handle_request is 'False' the classes must have a 'handle_request' function to handle
+the request, it must receive an argument which is the django HttpRequest."""
 import pprint
 
 from django.http import HttpRequest
@@ -10,11 +13,13 @@ from django.urls import path
 from ..Routes import Routes
 
 
-def execute_method(req: HttpRequest, obj):
+def execute_method(req: HttpRequest, obj, debug: bool = False):
     """Execute a function depending on the request method"""
-    print("Request method: ", req.method)
-    print("Request route: ", req.path_info)
-    print("Given object route: ", obj.route)
+    if debug:
+        print("Request method: ", req.method)
+        print("Request route: ", req.path_info)
+        print("Given object route: ", obj.route)
+    
     if req.method == "GET":
         return obj.get(req)
     elif req.method == "POST":
@@ -75,14 +80,19 @@ class DjangoRoutes(Routes):
             print("\n")
             route_instance = self.routes[route_path]
             route_name_parsed = self.parse_route_name(route_path)
-            print("Its route: ", route_instance.route)
-            print("Parsed route: ", route_name_parsed)
-            print(f"path({route_name_parsed}, {route_instance})")
+            if self.debug:
+                print("Its route: ", route_instance.route)
+                print("Parsed route: ", route_name_parsed)
+                print(f"path({route_name_parsed}, {route_instance})")
 
             # TODO: I don't know why it calls the wrong object, it would be cool to fix it later.
             if self.handle_request:
                 lambdas.append(
-                        lambda request: execute_method(request, route_instance))
+                        lambda request: execute_method(
+                            request,
+                            route_instance,
+                            debug=self.debug
+                        ))
                 urlpatterns.append(
                     path(
                         route_name_parsed,
