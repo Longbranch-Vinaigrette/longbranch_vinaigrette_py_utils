@@ -7,7 +7,8 @@ import json
 
 def _get_local_settings_path() -> str:
     """Get local settings path"""
-    return f"{os.getcwd()}{os.path.sep}local_settings.json"
+    # Django uses local_settings.json, so I can't use it.
+    return f"{os.getcwd()}{os.path.sep}local_data.json"
 
 
 def get_local_settings_path() -> str:

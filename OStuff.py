@@ -59,7 +59,7 @@ def run_commands(raw_cmds: str, debug:bool=False):
 
     os_name = get_platform_system(debug=debug)
 
-    if "Windows32bit" == os_name or "Windows64bit" == os_name:
+    if os_name in ["Windows32bit", "Windows64bit"]:
         parsed_cmds = bytes(raw_cmds, 'utf8')
         powershell_path = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
 
