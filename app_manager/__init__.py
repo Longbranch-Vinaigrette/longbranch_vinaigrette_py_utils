@@ -6,17 +6,34 @@ import json
 import os
 import subprocess
 from threading import Thread
-import pprint
 
-from src.utils.ProjectInfo import ProjectInfo
-from src.utils import LocalData
-from src.utils import OStuff
-from src.submodules.sub_sqlite3_utils import Sqlite3Utils
-from src.utils import Debug
-from src.utils.local_repository_manager.AppInfo import AppInfo
+from ..data_configuration.ProjectInfo import ProjectInfo
+from .. import Debug
+from ..dbs.RepositorySettings import RepositorySettings
 
 from .StartApp import StartApp
 from .ProcessInfo import ProcessInfo
+
+
+def send_term_signal(pid: int, debug: bool = False):
+    """Send term signal by pid"""
+    if debug:
+        print("\nstop_app():")
+    # Start a new process to shut down the previous process
+    # For this we will send a sigterm, which was captured before
+    raw_cmds = f"""
+    kill -s 15 {pid}
+    """
+    parsed_cmds = bytes(raw_cmds, 'utf8')
+
+    # For subprocess.Popen()
+    # It's recommended to use fully qualified paths, or
+    # some things might be overriden
+    process: subprocess.Popen = subprocess.Popen(["/bin/sh"],
+                                                 stdin=subprocess.PIPE,
+                                                 stdout=subprocess.PIPE,
+                                                 shell=True)
+    out, err = process.communicate(parsed_cmds)
 
 
 class AppManager:
@@ -27,7 +44,11 @@ class AppManager:
     so this might not be the wanted behaviour, for that
     set threaded to false
     """
-    def __init__(self, path: str, threaded: bool = True, debug: bool = False):
+    def __init__(
+            self,
+            path: str,
+            threaded: bool = True,
+            debug: bool = False):
         self.path: str = path
         self.threaded = threaded
         self.debug: bool = debug
@@ -42,17 +63,8 @@ class AppManager:
             self.debug = should_debug_app_manager
 
         # Get app settings
-        db_filename = LocalData.load_data("DBFilename")
-        db_path = OStuff.get_sql_db_path(db_filename)
-        sql_repository_settings = Sqlite3Utils(db_path, "repository_settings")
-        self.app_settings = sql_repository_settings.run_query(
-            f"""
-            SELECT * FROM repository_settings
-                WHERE user='{self.username}'
-            INTERSECT
-                SELECT * FROM repository_settings
-                    WHERE name='{self.app_name}'
-            """, True)
+        repository_settings = RepositorySettings()
+        self.app_settings = repository_settings.get_repository(self.username, self.app_name)
 
         self.project_info = ProjectInfo(self.path, debug=debug)
 
@@ -62,12 +74,12 @@ class AppManager:
             print("AppManager -> setup_and_start():")
 
         def setup_and_start():
-            project_info = AppInfo(item["path"])
+            project_info = ProjectInfo(item["path"])
 
             if self.debug:
                 print("Path: ", item["path"])
-                print("Project info: ", project_info.config)
-            if project_info.config is not None:
+                print("Project info: ", project_info.info)
+            if project_info.info is not None:
                 setup_command = project_info.get_setup_command()
 
                 if self.debug:

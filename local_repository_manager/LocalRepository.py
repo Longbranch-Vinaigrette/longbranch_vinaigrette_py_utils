@@ -1,21 +1,14 @@
 import os
 
-# from src.utils.app_manager import AppManager
 from ..app_manager import AppManager
-
-# from src.utils.app_manager.RestartApp import RestartApp
-# from src.utils.local_repository_manager.AppInfo import AppInfo
 from ..app_manager.RestartApp import RestartApp
-from ..local_repository_manager.AppInfo import AppInfo
 
 
-# class LocalRepository(AppInfo):
 class LocalRepository:
     """Handles/Manages a single repository given by path"""
     filename = "settings.json"
 
     def __init__(self, path: str, debug=False):
-        # super().__init__(path, "settings.json", debug)
         self.debug = debug
         if self.debug:
             print("LocalRepository -> __init__():")
