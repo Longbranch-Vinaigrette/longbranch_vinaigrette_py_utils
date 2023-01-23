@@ -28,14 +28,15 @@ class SelfAppManager:
                     # If this app kills spawned subprocesses on exit, which is true by default
                     "killsSubprocessesOnExit": True,
                 },
-                True)
+                debug)
 
     def start_app(self):
         if self.debug:
             print("\nstart_app()")
 
         parsed_cmds = bytes(self.start_cmd, 'utf8')
-        print("Parsed cmds: ", parsed_cmds)
+        if self.debug:
+            print("Parsed cmds: ", parsed_cmds)
 
         # For subprocess.Popen()
         # It's recommended to use fully qualified paths, or
@@ -44,7 +45,6 @@ class SelfAppManager:
                                                      stdin=subprocess.PIPE,
                                                      stdout=subprocess.PIPE,
                                                      shell=True)
-        print("Database server started")
         LocalData.save_data(
             {
                 "subprocesses": {
@@ -54,7 +54,8 @@ class SelfAppManager:
             True)
 
         out, err = process.communicate(parsed_cmds)
-        print("Communicated with subprocess")
+        if self.debug:
+            print("Communicated with subprocess")
         print(out.decode("utf-8"))
 
     def stop_app(self):
