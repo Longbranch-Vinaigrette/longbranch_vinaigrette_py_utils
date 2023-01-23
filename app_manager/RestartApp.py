@@ -1,14 +1,10 @@
-import json
 import os
 import pprint
 from threading import Thread
 
-from src.submodules.sub_sqlite3_utils import Sqlite3Utils
-
-from src.utils import Debug
-from src.utils.app_manager import AppManager
-from src.utils import LocalData
-from src.utils import OStuff
+from ..dbs.RepositorySettings import RepositorySettings
+from .. import Debug
+from ..app_manager import AppManager
 
 
 class RestartApp:
@@ -19,7 +15,7 @@ class RestartApp:
             repository_path: str,
             unique_key: str = "",
             full_name: str = "",
-            only_restart_if_enabled: bool = False,
+            only_restart_if_start_on_boot_is_enabled: bool = False,
             debug: bool = False
     ):
         # Get names and stuff
@@ -28,28 +24,20 @@ class RestartApp:
         self.username = self.path.split(os.path.sep)[-2]
         self.repository_name = repository_name
         self.unique_key = unique_key
+        self.only_restart_if_start_on_boot_is_enabled = only_restart_if_start_on_boot_is_enabled
         self.debug = debug
 
         if self.debug:
-            print("LocalRepository -> RestartApp -> __init__():")
+            print("RestartApp -> __init__():")
             print(f"Repository pulled: {self.repository_name}")
             print(f"Repository path: {self.path}")
             print(f"Username: {self.username}")
 
         # Get app settings
-        db_filename = LocalData.load_data("DBFilename")
-        db_path = OStuff.get_sql_db_path(db_filename)
-        sql_repository_settings = Sqlite3Utils(db_path, "repository_settings")
-
-        # First let's check if the app is enabled
-        self.app_settings = sql_repository_settings.run_query(
-            f"""
-            SELECT * FROM repository_settings
-                WHERE user='{self.username}'
-            INTERSECT
-                SELECT * FROM repository_settings
-                    WHERE name='{self.repository_name}'
-            """)
+        repository_settings = RepositorySettings()
+        self.app_settings = repository_settings.get_repository(
+            self.username,
+            self.repository_name)
 
         self.restart_app()
 
@@ -59,20 +47,15 @@ class RestartApp:
         Restarts an app if it's enabled"""
         # Should debug app manager?
         if self.debug:
-            print("LocalRepository -> RestartApp -> restart_app():")
-
-        # enabled and setup_finalized are strings
-        enabled = json.loads(self.app_settings["enabled"])["value"]
-        self.app_settings["enabled"] = enabled
-        setup_finalized = json.loads(self.app_settings["setup_finalized"])["value"]
-        self.app_settings["setup_finalized"] = setup_finalized
+            print("RestartApp -> restart_app():")
 
         # The app is not enabled, don't restart
-        if not self.app_settings["enabled"]:
-            if self.debug:
-                print("The app is not enabled, therefore it's not necessary to restart "
-                      "the app.")
-            return
+        if self.only_restart_if_start_on_boot_is_enabled:
+            if not self.app_settings["start_on_boot"]:
+                if self.debug:
+                    print("The app is not enabled, therefore it's not necessary to restart "
+                          "the app.")
+                return
 
         if self.debug:
             print("App settings: ")
