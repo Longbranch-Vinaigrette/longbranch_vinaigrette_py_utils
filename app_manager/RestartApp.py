@@ -12,17 +12,16 @@ from src.utils import OStuff
 
 
 class RestartApp:
-    """Keeping for backwards compatibility reasons
-    @deprecated"""
+    """Keeping for backwards compatibility reasons"""
     def __init__(
             self,
             repository_name: str,
             repository_path: str,
             unique_key: str = "",
             full_name: str = "",
+            only_restart_if_enabled: bool = False,
             debug: bool = False
     ):
-        """@deprecated"""
         # Get names and stuff
         self.path = repository_path
         self.full_name = full_name
@@ -38,7 +37,6 @@ class RestartApp:
             print(f"Username: {self.username}")
 
         # Get app settings
-        # Start sql
         db_filename = LocalData.load_data("DBFilename")
         db_path = OStuff.get_sql_db_path(db_filename)
         sql_repository_settings = Sqlite3Utils(db_path, "repository_settings")

@@ -1,6 +1,8 @@
+import json
 import os
 
 from . import DataLocation
+from . import LocalData
 
 
 def get_databases_path():
@@ -28,3 +30,16 @@ def get_databases_path_list():
         if db_name.endswith(".db"):
             result.append(f"{get_databases_path()}{os.path.sep}{db_name}")
     return result
+
+
+def get_full_db_path():
+    # Get the filename of the DB
+    db_filename = "devtools.db"
+    try:
+        with open(LocalData.get_local_settings_path(), "r") as f:
+            local_data = json.load(f)
+            db_filename = local_data["DBFilename"] if local_data["DBFilename"] else "devtools.db"
+    except:
+        db_filename = "devtools.db"
+    db_path = get_sql_db_path(db_filename)
+    return db_path
