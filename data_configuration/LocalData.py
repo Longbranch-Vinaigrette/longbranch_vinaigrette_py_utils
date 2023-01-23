@@ -25,28 +25,43 @@ def get_local_settings_path() -> str:
     return path
 
 
-def save_data(new_data, key: str):
-    """Save data"""
+def save_data(new_data: dict, debug: bool = False):
+    """Save data without removing old data
+
+    Instead, it replaces the old data with the new data if it was given"""
     data = {}
     with open(get_local_settings_path(), "r") as f:
         try:
             data = json.load(f)
         except Exception as ex:
+            # Maybe the file doesn't exist
             print("Couldn't load previous data, exception: ", ex)
+
+    if debug:
+        print("Previous data: ", data)
+        print("Its type: ", type(data))
+
+    # It's a string somehow
+    if isinstance(data, str):
+        data = json.loads(data)
 
     # Save the filename so it can be loaded somewhere else
     with open(get_local_settings_path(), "w") as f:
-        data[key] = new_data
+        data = {
+            **data,
+            **new_data,
+        }
+        if debug:
+            print("Data to store: ", data)
         json.dump(data, f)
 
 
-def load_data(key: str):
+def load_data():
     """Load data"""
     data = None
     with open(get_local_settings_path(), "r") as f:
         try:
             data = json.load(f)
-            data = data[key]
         except Exception as ex:
             print("Couldn't load previous data, exception: ", ex)
     return data
