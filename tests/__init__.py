@@ -1,13 +1,13 @@
 import pprint
 
-from ..data_configuration import DataLocation, DBPath, LocalData
-from ..data_configuration.ProjectInfo import ProjectInfo
+from ..data_configuration import DataLocation, DBPath
 from ..local_repository_manager import LocalRepositoryManager
 from ..dynamic_imports.Routes import Routes
 
 
-def test_db_paths(show_output: bool = False):
-    print("\ntests -> test_db_paths():")
+def test_db_paths(show_output: bool = False, debug: bool = False):
+    if debug:
+        print("\ntests -> test_db_paths():")
 
     try:
         out = DBPath.get_databases_path()
@@ -34,8 +34,9 @@ def test_db_paths(show_output: bool = False):
         print("[Failed] DBPath.get_databases_path_list()")
 
 
-def test_local_repository_manager(show_output: bool = False):
-    print("\ntests -> test_local_repository_manager():")
+def test_local_repository_manager(show_output: bool = False, debug: bool = False):
+    if debug:
+        print("\ntests -> test_local_repository_manager():")
 
     try:
         rep_manager = LocalRepositoryManager(DataLocation.get_repositories_path(), debug=True)
@@ -56,8 +57,9 @@ def test_local_repository_manager(show_output: bool = False):
         print("[Failed] LocalRepositoryManager.get_all_repos_info()")
 
 
-def test_dynamic_imports_routes(routes_path: str, debug: bool = False, show_output: bool = False):
-    print("\ntests -> test_dynamic_imports_routes():")
+def test_dynamic_imports_routes(routes_path: str, show_output: bool = False, debug: bool = False):
+    if debug:
+        print("\ntests -> test_dynamic_imports_routes():")
 
     try:
         routes = Routes(routes_path, debug=debug)

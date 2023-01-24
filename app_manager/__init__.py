@@ -140,6 +140,29 @@ class AppManager:
 
         def stop_app():
             """Stop app in the given path"""
+            app_data = self.project_info.info
+            if app_data and app_data["commands"]:
+                commands = app_data["commands"]
+
+                # Check if the app has a stop command
+                if commands["stop"]:
+                    # Run stop command
+                    parsed_cmds = bytes(commands["stop"], 'utf8')
+                    if self.debug:
+                        print("Stop command: ", parsed_cmds)
+
+                    stop_process: subprocess.Popen = subprocess.Popen(["/bin/sh"],
+                                                                 stdin=subprocess.PIPE,
+                                                                 stdout=subprocess.PIPE,
+                                                                 shell=True)
+                    out, err = stop_process.communicate(parsed_cmds)
+
+                    if self.debug:
+                        print(out)
+
+                    # App terminated go back
+                    return
+
             # To kill get the pid and use 'kill <PID>'
 
             # If the command is for example 'python3.10 main.py'
