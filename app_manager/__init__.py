@@ -68,10 +68,11 @@ def terminate_app(path: str, debug: bool = False):
             print(f"Current Working Directory(cwd): {process['cwd']}")
             print(f"Command: {process['cmd']}")
 
-        # Here we don't know if the app is the one that we want to terminate, this would
-        # terminate any app with the given command
-        project_info = ProjectInfo(process["cwd"])
-        if project_info.info is not None:
+        try:
+            # This throws an error if it's not DevTools compatible(Doesn't have a settings.json
+            # with the field 'devtools')
+            ProjectInfo(process["cwd"])
+
             # This app is DevTools compatible
             # Check if it's the same app we are looking for
             if path == process["cwd"]:
@@ -80,8 +81,8 @@ def terminate_app(path: str, debug: bool = False):
                     print("Status: This is the app, sending kill signal.")
                 subprocess.run(["kill", "-s", "15", f"{process['pid']}"])
                 # The app might have more processes therefore we need to keep looping
-        elif project_info.info is None:
-            # This is not the app
+        except:
+            # This app is not DevTools compatible
             if debug:
                 print("Status: This is not the app.")
 
@@ -142,7 +143,7 @@ class AppManager:
                 commands = app_data["commands"]
 
                 # Check if the app has a stop command
-                if commands["stop"]:
+                if "stop" in commands:
                     # Run stop command
                     parsed_cmds = bytes(commands["stop"], 'utf8')
                     if self.debug:
