@@ -13,10 +13,9 @@ class ProjectInfo:
 
         try:
             with open(f"{path}{os.path.sep}settings.json", "r") as f:
-                self.info = json.load(f)["dev-gui"]
+                self.info = json.load(f)["devtools"]
         except Exception as ex:
-            if self.debug:
-                print("Error: Couldn't retrieve data, ", ex)
+            raise Exception(f"The app at {self.path} is not DevTools compatible.")
 
     def load_settings_data(self, key: str):
         """Load settings data"""
