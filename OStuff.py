@@ -1,4 +1,3 @@
-import json
 import platform
 import os
 import subprocess

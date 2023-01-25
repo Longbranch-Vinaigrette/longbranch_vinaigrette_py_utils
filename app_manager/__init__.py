@@ -18,7 +18,7 @@ from .ProcessInfo import ProcessInfo
 def send_term_signal(pid: int, debug: bool = False):
     """Send term signal by pid"""
     if debug:
-        print("\nstop_app():")
+        print("\nsend_term_signal():")
     # Start a new process to shut down the previous process
     # For this we will send a sigterm, which was captured before
     raw_cmds = f"""
@@ -169,20 +169,17 @@ class AppManager:
             # we can separate the command name from the parameters by
             # splitting by spaces
             # Retrieve data from the path
-            try:
-                with open(f"{self.path}{os.path.sep}settings.json") as f:
-                    app_data = json.load(f)
-                    commands = app_data["dev-gui"]["commands"]
-                    start_cmd = commands["start"]
+            commands = self.project_info.get_commands()
 
-                    # Split by spaces and get the first which is the command name
-                    command_name = start_cmd.split(" ")[0]
-            except Exception as ex:
+            # Some DevTools apps might store the pid inside the project path
+
+            if not commands:
                 print("AppManger -> stop_app():")
-                print("There should be no exceptions here unless the"
-                      "app is not configured correctly(it doesn't have"
-                      "a correct settings.json), exception: ", ex)
-                return
+                msg = "The app has no commands, AppManager can't figure out a way to find the app pid."
+                raise Exception(msg)
+
+            # Split by spaces and get the first which is the command name
+            command_name = commands["start"].split(" ")[0]
             if self.debug:
                 print(f"Command name: {command_name}")
 

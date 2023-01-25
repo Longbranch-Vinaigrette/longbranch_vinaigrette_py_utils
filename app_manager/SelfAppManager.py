@@ -3,32 +3,25 @@ import subprocess
 
 from ..data_configuration import LocalData
 from .. import app_manager
+from .. import os_stuff
 
 
 class SelfAppManager:
-    def __init__(self, start_cmd: str, capture_pid: bool = False, debug: bool = False):
+    def __init__(self, start_cmd: str, debug: bool = False):
         """Self app manager
 
         This is script is intended to manage this very app, not apps somewhere else, for that
         use app_manager.AppManager"""
         self.start_cmd = start_cmd
-        self.capture_pid = capture_pid
         self.debug = debug
 
         # Reference/s
         # https://www.geeksforgeeks.org/python-os-getpid-method/
-        if capture_pid:
-            pid = os.getpid()
-            if self.debug:
-                print("Process pid: ", pid)
-                print("Pid type: ", type(pid))
-            LocalData.save_data(
-                {
-                    "pid": pid,
-                    # If this app kills spawned subprocesses on exit, which is true by default
-                    "killsSubprocessesOnExit": True,
-                },
-                debug)
+        pid = os.getpid()
+        if self.debug:
+            print("Process pid: ", pid)
+            print("Pid type: ", type(pid))
+        os_stuff.capture_pid()
 
     def start_app(self):
         if self.debug:
@@ -64,9 +57,8 @@ class SelfAppManager:
 
         previous_data = LocalData.load_data()
         original_process_pid = previous_data["pid"]
-        # Remove pid, just in case
-        LocalData.save_data({
-            "pid": "",
-        })
+
+        # Remove pid
+        os_stuff.remove_pid()
 
         app_manager.send_term_signal(original_process_pid, debug=self.debug)
