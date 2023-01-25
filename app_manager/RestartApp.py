@@ -8,22 +8,17 @@ from ..app_manager import AppManager
 
 
 class RestartApp:
-    """Keeping for backwards compatibility reasons"""
     def __init__(
             self,
             repository_name: str,
             repository_path: str,
-            unique_key: str = "",
-            full_name: str = "",
             only_restart_if_start_on_boot_is_enabled: bool = False,
             debug: bool = False
     ):
         # Get names and stuff
         self.path = repository_path
-        self.full_name = full_name
         self.username = self.path.split(os.path.sep)[-2]
         self.repository_name = repository_name
-        self.unique_key = unique_key
         self.only_restart_if_start_on_boot_is_enabled = only_restart_if_start_on_boot_is_enabled
         self.debug = debug
 
