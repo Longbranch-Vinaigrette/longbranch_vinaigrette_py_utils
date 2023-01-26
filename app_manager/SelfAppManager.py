@@ -2,7 +2,7 @@ import os
 import subprocess
 
 from ..data_configuration import LocalData
-from .. import app_manager
+from ..app_manager import AppManager
 from .. import os_stuff
 
 
@@ -61,4 +61,4 @@ class SelfAppManager:
         # Remove pid
         os_stuff.remove_pid()
 
-        app_manager.send_term_signal(original_process_pid, debug=self.debug)
+        AppManager(os.getcwd()).send_term_signal(original_process_pid)

@@ -59,8 +59,21 @@ class ProcessInfo:
                 print(f"Process timed out.\n{exc}")
         return None
 
-    def get_cwd_by_pid(self, pid: str):
-        """Get working directory of the process running with the given pid"""
+    def get_cwd(self, pid: str):
+        """Get cwd by pid"""
+        cwd = self.run_subprocess(f"readlink /proc/{pid}/cwd")
+
+        if cwd:
+            # The [:-1] is because it comes with a f*ing space at the end, I've wasted 20 minutes
+            # of my life trying to figure it out.
+            cwd = cwd[:-1]
+        return cwd
+
+    def get_cwd_by_pid_lsof(self, pid: str):
+        """Get working directory of the process running with the given pid
+
+        @deprecated"""
+        # lsof is too slow
         cwd = self.run_subprocess(f"lsof -p {pid} | grep cwd")
 
         # Some processes don't have cwd
@@ -131,7 +144,10 @@ class ProcessInfo:
                 continue
 
             if self.add_cwd:
-                parsed_info["cwd"] = self.get_cwd_by_pid(parsed_info["pid"])
+                # Get cwd by pid
+                pid = parsed_info["pid"]
+                process_cwd = self.get_cwd(pid)
+                parsed_info["cwd"] = process_cwd
 
             result.append(parsed_info)
 

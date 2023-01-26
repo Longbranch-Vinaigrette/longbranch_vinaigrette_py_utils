@@ -14,79 +14,6 @@ from .StartApp import StartApp
 from .ProcessInfo import ProcessInfo
 
 
-def send_term_signal(pid: int, debug: bool = False):
-    """Send term signal by pid"""
-    if debug:
-        print("\nsend_term_signal():")
-    # Start a new process to shut down the previous process
-    # For this we will send a sigterm, which was captured before
-    raw_cmds = f"""
-    kill -s 15 {pid}
-    """
-    parsed_cmds = bytes(raw_cmds, 'utf8')
-
-    # For subprocess.Popen()
-    # It's recommended to use fully qualified paths, or
-    # some things might be overriden
-    process: subprocess.Popen = subprocess.Popen(["/bin/sh"],
-                                                 stdin=subprocess.PIPE,
-                                                 stdout=subprocess.PIPE,
-                                                 shell=True)
-    out, err = process.communicate(parsed_cmds)
-
-
-def terminate_app(path: str, debug: bool = False):
-    """Terminate an app by the command name"""
-    commands = ProjectInfo(path).get_commands()
-
-    # Check if the app has commands first, if not, it's impossible to identify it.
-    if not commands:
-        print("AppManger -> stop_app():")
-        msg = "The app has no commands, AppManager can't figure out a way to find the app pid."
-        raise Exception(msg)
-
-    # Split by spaces and get the first which is the command name
-    command_name = commands["start"].split(" ")[0]
-    if debug:
-        print(f"Command name: {command_name}")
-
-    # Get the cwd of multiple processes and check if
-    # there's a settings.json file in their path.
-    pinfo = ProcessInfo(
-        command_name,
-        ["euser", "pid", "ppid", "cmd"],
-        add_cwd=True,
-        debug=debug)
-    pdata = pinfo.get_processes_info_by_name()
-
-    # Some process have more than one subprocess that must also
-    # be killed, so don't break the loop after killing one subprocess
-    for process in pdata:
-        if debug:
-            print(f"--- {process['pid']} ---")
-            print(f"User: {process['euser']}")
-            print(f"Current Working Directory(cwd): {process['cwd']}")
-            print(f"Command: {process['cmd']}")
-
-        try:
-            # This throws an error if it's not DevTools compatible(Doesn't have a settings.json
-            # with the field 'devtools')
-            ProjectInfo(process["cwd"])
-
-            # This app is DevTools compatible
-            # Check if it's the same app we are looking for
-            if path == process["cwd"]:
-                # This is the app
-                if debug:
-                    print("Status: This is the app, sending kill signal.")
-                subprocess.run(["kill", "-s", "15", f"{process['pid']}"])
-                # The app might have more processes therefore we need to keep looping
-        except:
-            # This app is not DevTools compatible
-            if debug:
-                print("Status: This is not the app.")
-
-
 class AppManager:
     """App manager
 
@@ -116,6 +43,103 @@ class AppManager:
 
         self.project_info = ProjectInfo(self.path, debug=debug)
 
+    def send_term_signal(self, pid: int):
+        """Send term signal by pid"""
+        if self.debug:
+            print("\nsend_term_signal():")
+        # Start a new process to shut down the previous process
+        # For this we will send a sigterm, which was captured before
+        raw_cmds = f"""
+        kill -s 15 {pid}
+        """
+        parsed_cmds = bytes(raw_cmds, 'utf8')
+
+        # For subprocess.Popen()
+        # It's recommended to use fully qualified paths, or
+        # some things might be overriden
+        process: subprocess.Popen = subprocess.Popen(["/bin/sh"],
+                                                     stdin=subprocess.PIPE,
+                                                     stdout=subprocess.PIPE,
+                                                     shell=True)
+        out, err = process.communicate(parsed_cmds)
+
+    def get_process_info_by_command_name(self, command_name: str):
+        """Get process infor by command name"""
+        if self.debug:
+            print("\nAppManager -> get_process_info_by_command_name():")
+        # Get the cwd of multiple processes
+        pinfo = ProcessInfo(
+            command_name,
+            ["euser", "pid", "ppid", "cmd"],
+            add_cwd=True,
+            debug=self.debug)
+        pdata = pinfo.get_processes_info_by_name()
+        return pdata
+
+    def get_processes_info(self):
+        """Get processes info/data"""
+        if self.debug:
+            print("\nAppManager -> get_processes_info():")
+        commands = ProjectInfo(self.path).get_commands()
+
+        # Check if the app has commands first, if not, it's impossible to identify it.
+        if not commands:
+            print("AppManger -> get_processes_info():")
+            msg = "The app has no commands, AppManager can't figure out a way to find the app pid."
+            # TODO: It's still possible to get the pid if you have the cwd.
+            #       But this might be too slow.
+            raise Exception(msg)
+
+        # Split by spaces and get the first which is the command name
+        command_name = commands["start"].split(" ")[0]
+        if self.debug:
+            print(f"Command name: {command_name}")
+
+        processes_data = self.get_process_info_by_command_name(command_name)
+        return processes_data
+
+    def terminate_app(self):
+        """Terminate an app by the command name"""
+        if self.debug:
+            print("\nAppManager -> terminate_app():")
+        processes_data = self.get_processes_info()
+
+        # Some process have more than one subprocess that must also
+        # be killed, so don't break the loop after killing one subprocess
+        for process in processes_data:
+            if self.debug:
+                print(f"--- {process['pid']} ---")
+                print(f"User: {process['euser']}")
+                print(f"Current Working Directory(cwd): {process['cwd']}")
+                print(f"Command: {process['cmd']}")
+
+            try:
+                # This throws an error if it's not DevTools compatible(Doesn't have a settings.json
+                # with the field 'devtools')
+                ProjectInfo(process["cwd"])
+
+                # This app is DevTools compatible
+                # Check if it's the same app we are looking for
+                if self.path == process["cwd"]:
+                    # This is the app
+                    if self.debug:
+                        print("Status: This is the app, sending kill signal.")
+                    subprocess.run(["kill", "-s", "15", f"{process['pid']}"])
+                    # The app might have more processes therefore we need to keep looping
+            except:
+                # This app is not DevTools compatible
+                if self.debug:
+                    print("Status: This is not the app.")
+
+    def is_app_running(self):
+        """Check if the app is running"""
+        if self.debug:
+            print("AppManager -> terminate_app():")
+
+
+    ##################
+    ### Operations ###
+    ##################
     def start_app(self):
         """Starts the application in the background"""
         if self.debug:
@@ -167,12 +191,13 @@ class AppManager:
                 if self.debug:
                     print("Pid found: ", pid)
                     print("Killing process.")
-                subprocess.run(["kill", "-s", "15", f"{pid}"])
+                # subprocess.run(["kill", "-s", "15", f"{pid}"])
+                self.send_term_signal(pid)
                 return
 
             # If the app has no stop command, no pid file, we need to do it the hard way.
             # Search for the app and terminate it
-            terminate_app(self.path, self.debug)
+            self.terminate_app()
         if self.threaded:
             # I don't think this is necessary, but just in case
             def run_fn():
