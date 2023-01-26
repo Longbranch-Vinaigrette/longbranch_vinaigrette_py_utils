@@ -1,8 +1,7 @@
-import json
 import os
 
 from ...sqlite3_utils import Sqlite3Utils
-from ..data_configuration import DataLocation, LocalData, DBPath
+from ..data_configuration import DataLocation, DBPath
 
 
 class RepositorySettings:
@@ -14,17 +13,19 @@ class RepositorySettings:
         if self.debug:
             print("\nRepositorySettings -> __init__():")
 
+        self.table = "repository_settings"
+
         # Get the filename of the DB
         db_path = DBPath.get_full_db_path()
         self.sql_repository_settings = Sqlite3Utils(
             db_path,
-            "repository_settings",
+            self.table,
             debug=self.debug)
 
     def get_all(self):
         """Get every repository settings data"""
         data = self.sql_repository_settings.run_query(
-            f"""SELECT * FROM repository_settings""",
+            f"""SELECT * FROM {self.table}""",
             # Decode json data automatically
             True)
         return data
@@ -32,10 +33,10 @@ class RepositorySettings:
     def get_repository(self, username: str, repository_name: str):
         """Get repository settings data"""
         data = self.sql_repository_settings.run_query(f"""
-            SELECT * FROM repository_settings
+            SELECT * FROM {self.table}
                 WHERE user='{username}'
             INTERSECT
-                SELECT * FROM repository_settings
+                SELECT * FROM {self.table}
                     WHERE name='{repository_name}'
             """,
             True)
