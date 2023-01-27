@@ -6,7 +6,7 @@ class Settings:
     def __init__(self):
         # Get the filename of the DB
         db_path = DBPath.get_full_db_path()
-        self.sql_settings_table = Sqlite3Utils(db_path, "settings")
+        self.sql_settings_table = Sqlite3Utils(db_path, "settings", parse_json=True)
 
     def upsert(self, data: dict, filterA: dict):
         """Alias for insert replace"""

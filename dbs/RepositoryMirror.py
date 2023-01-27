@@ -17,6 +17,7 @@ class RepositoryMirror:
         self.sql_repository_settings = Sqlite3Utils(
             db_path,
             self.db_name,
+            parse_json=True,
             debug=self.debug)
 
     def get_all(self):
