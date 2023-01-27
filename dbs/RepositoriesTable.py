@@ -2,7 +2,7 @@ from ...sqlite3_utils import Sqlite3Utils
 from ..data_configuration import DataLocation, DBPath
 
 
-class Repositories:
+class RepositoriesTable:
     repositories_path = f"{DataLocation.get_data_path()}/repositories"
 
     def __init__(self, db_name: str = "repositories", debug: bool = False):
