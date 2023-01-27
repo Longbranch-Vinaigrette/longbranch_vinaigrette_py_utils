@@ -16,5 +16,4 @@ def remove_pid():
     LocalData.save_data({
         "pid": "",
     })
-    with open("pid", "w") as f:
-        f.write(f"\n")
+    os.remove("./pid")
