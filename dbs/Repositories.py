@@ -40,11 +40,9 @@ class Repositories:
         data = self.sql_repository_settings.get_filtered(filterA)
         return data
 
-    def upsert(self, data: dict, key: str):
+    def upsert(self, data: dict, filterA: dict):
         """Insert or replace data"""
         if self.debug:
             print("\nRepositoryMirror -> upsert():")
 
-        return self.sql_repository_settings.insert_replace_v2(data, {
-            "key": key,
-        })
+        return self.sql_repository_settings.insert_replace_v2(data, filterA)
