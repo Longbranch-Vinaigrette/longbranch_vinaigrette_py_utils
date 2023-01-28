@@ -3,10 +3,14 @@ from ..data_configuration import DBPath
 
 
 class Settings:
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         # Get the filename of the DB
         db_path = DBPath.get_full_db_path()
-        self.sql_settings_table = Sqlite3Utils(db_path, "settings", parse_json=True)
+        self.sql_settings_table = Sqlite3Utils(
+            db_path,
+            "settings",
+            parse_json=True,
+            debug=debug)
 
     def upsert(self, data: dict, filterA: dict):
         """Alias for insert replace"""
