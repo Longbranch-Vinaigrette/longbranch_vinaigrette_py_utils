@@ -7,7 +7,7 @@ from .. import os_stuff
 
 
 class SelfAppManager:
-    def __init__(self, start_cmd: str, debug: bool = False):
+    def __init__(self, start_cmd: str = "", debug: bool = False):
         """Self app manager
 
         This is script is intended to manage this very app, not apps somewhere else, for that
@@ -26,6 +26,9 @@ class SelfAppManager:
     def start_app(self):
         if self.debug:
             print("\nstart_app()")
+
+        if not self.start_cmd:
+            raise Exception("Start cmd command not defined.")
 
         parsed_cmds = bytes(self.start_cmd, 'utf8')
         if self.debug:

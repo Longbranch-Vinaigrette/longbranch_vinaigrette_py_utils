@@ -46,7 +46,7 @@ class AppManager:
     def send_term_signal(self, pid: int):
         """Send term signal by pid"""
         if self.debug:
-            print("\nsend_term_signal():")
+            print("\nAppManager -> send_term_signal():")
         # Start a new process to shut down the previous process
         # For this we will send a sigterm, which was captured before
         raw_cmds = f"""
