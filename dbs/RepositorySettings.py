@@ -51,6 +51,13 @@ class RepositorySettings:
             True)
         return data
 
+    def delete_row(self, username: str, repository_name: str):
+        """Delete a row"""
+        self.sql_repository_settings.run_query(f"""
+            DELETE FROM {self.table}
+                WHERE (user='{username}' AND name='{repository_name}');
+            """)
+
     def upsert(self, data: dict, filterA: dict):
         """Insert or replace data"""
         if self.debug:
