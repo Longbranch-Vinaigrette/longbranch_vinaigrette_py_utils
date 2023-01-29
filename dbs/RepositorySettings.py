@@ -31,6 +31,14 @@ class RepositorySettings:
             True)
         return data
 
+    def get_user_repositories(self, username: str):
+        """Get user repositories"""
+        data = self.sql_repository_settings.run_query(f"""
+            SELECT * FROM {self.table}
+                WHERE user='{username}'
+            """)
+        return data
+
     def get_repository(self, username: str, repository_name: str):
         """Get repository settings data"""
         data = self.sql_repository_settings.run_query(f"""

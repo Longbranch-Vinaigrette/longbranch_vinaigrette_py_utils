@@ -1,14 +1,18 @@
 import os
 
+from ..data_configuration import DataLocation
+from .LocalRepository import LocalRepository
+
 
 class LocalRepositoryManager:
-    path: str = ""
+    path: str = DataLocation.get_repositories_path()
 
     users = []
     debug = False
 
-    def __init__(self, repositories_path: str, debug=False):
-        self.path = repositories_path
+    def __init__(self, repositories_path: str = "", debug=False):
+        if repositories_path:
+            self.path = repositories_path
         self.debug = debug
 
         if self.debug:
@@ -49,12 +53,24 @@ class LocalRepositoryManager:
 
     def get_user_repos_info(self, username: str) -> list:
         """Get user repository info"""
-        return [{
+        user_repositories: list = []
+        for name in self.get_user_repository_list(username):
+            # Repository path
+            repository_path = f"{self.path}{os.path.sep}{username}{os.path.sep}{name}"
+
+            # Is devtools compatible?
+            devtools = LocalRepository(repository_path).is_devtools_compatible()
+
+            # Append repository
+            user_repositories.append({
                 "user": username,
                 "name": name,
-                "path": f"{self.path}{os.path.sep}{username}{os.path.sep}{name}",
+                "path": repository_path,
                 "start_on_boot": False,
-            } for name in self.get_user_repository_list(username)]
+                "dev_tools": devtools,
+            })
+
+        return user_repositories
 
     def get_all_repos_info(self) -> list:
         """Get repositories information"""

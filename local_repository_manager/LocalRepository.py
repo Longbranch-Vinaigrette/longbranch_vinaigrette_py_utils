@@ -1,7 +1,7 @@
+import json
 import os
 
 from ..app_manager import AppManager
-from ..app_manager.RestartApp import RestartApp
 
 
 class LocalRepository:
@@ -20,17 +20,24 @@ class LocalRepository:
         self.username = path.split("/")[-2]
         self.repository_name = path.split("/")[-1]
 
+    def is_devtools_compatible(self):
+        """Check if the app is devtools compatible"""
+        try:
+            with open(self.path) as f:
+                data = json.load(f)
+                if data["devtools"]:
+                    return True
+        except:
+            pass
+        return False
+
     def restart_app(self):
         """Restart the app at the given path"""
-        return RestartApp(self.repository_name, self.path)
+        return AppManager(self.path).restart_app()
 
     def start_app(self):
         """Start the app"""
         return AppManager(self.path).start_app()
-
-    def setup_and_restart(self):
-        """Setup and start"""
-        return AppManager(self.path).setup_and_restart()
 
     def stop_app(self):
         """Stop app"""
