@@ -1,7 +1,10 @@
 """App manager
 
 Manages app instantiation and termination,
-only for linux"""
+only for linux
+
+
+"""
 import os
 import subprocess
 from threading import Thread
@@ -31,11 +34,6 @@ class AppManager:
         self.app_name: str = path.split(os.path.sep)[-1]
         self.username: str = path.split(os.path.sep)[-2]
         self.start_commands: list = []
-
-        # Check if the user added a parameter to debug the app manager
-        if not self.debug:
-            should_debug_app_manager = Debug.should_debug_app_manager()
-            self.debug = should_debug_app_manager
 
         # Get app settings
         repository_settings = RepositorySettings()
