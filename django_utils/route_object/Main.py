@@ -97,7 +97,7 @@ class Main:
         """Make a get request"""
         dj_utils = DjangoUtils(request)
         if self.use_json:
-            data = dj_utils.validate_json_content_type(request)
+            data = dj_utils.validate_accept_json()
 
             # If there is "debug" in data it means that there was an error
             if not "debug" in data:

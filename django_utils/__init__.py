@@ -29,7 +29,7 @@ def validate_json_content_type(request: HttpRequest):
     except Exception as ex:
         print("Exception: ")
         print(ex)
-        return Debug("Unknown error, it's likely that the table doesn't exist.", error=True,
+        return Debug(f"Unknown error: {str(ex)}.", error=True,
                      state="error") \
             .get_full_message()
 
@@ -50,3 +50,24 @@ class DjangoUtils:
         if self.debug:
             print("\nDjangoUtils -> validate_json_content_type():")
         return validate_json_content_type(request)
+
+    def validate_accept_json(self):
+        """Validate if the Accept header of the request is json"""
+        try:
+            if "Accept" in self.request.headers:
+                json_supported_headers = ["application/json", "application/*", "*/*"]
+                if self.request.headers["Accept"] in json_supported_headers:
+                    return {}
+                else:
+                    msg = f"Accept header not supported, given: {self.request.headers['Accept']}"
+                    return Debug(msg, error=True, state="error") \
+                        .get_full_message()
+            else:
+                return Debug("'Accept' header not given.", error=True, state="error") \
+                    .get_full_message()
+        except Exception as ex:
+            print("Exception: ")
+            print(ex)
+            return Debug(f"Unknown error: {str(ex)}.", error=True,
+                         state="error") \
+                .get_full_message()
