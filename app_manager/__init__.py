@@ -12,8 +12,9 @@ from threading import Thread
 from ... import process_utils
 
 from ..data_configuration.ProjectInfo import ProjectInfo
-from .. import Debug
 from ..dbs.RepositorySettings import RepositorySettings
+from .. import Debug
+from .. import OStuff
 
 from .StartApp import StartApp
 from .ProcessInfo import ProcessInfo
@@ -76,11 +77,16 @@ class AppManager:
     def start_app(self):
         """Starts the application in the background"""
         if self.debug:
-            print("AppManager -> start_app():")
+            print("\nAppManager -> start_app():")
 
         def start_app():
             # The app will be executed on creation
-            StartApp(self.path, self.project_info, debug=self.debug)
+            # StartApp(self.path, self.project_info, debug=self.debug)
+            start_command = self.project_info.get_start_command()
+            if not start_command:
+                raise Exception("The app doesn't have a start command.")
+            else:
+                out, err = OStuff.run_commands(start_command)
 
         if self.threaded:
             thread = Thread(target=start_app)
@@ -91,7 +97,7 @@ class AppManager:
     def stop_app(self):
         """Stops the application in the background"""
         if self.debug:
-            print("AppManager -> stop_app():")
+            print("\nAppManager -> stop_app():")
 
         def stop_app():
             """Stop app in the given path"""
@@ -139,6 +145,9 @@ class AppManager:
 
     def restart_app(self):
         """Restarts an app"""
+        if self.debug:
+            print("\nAppManager -> restart_app():")
+
         # Check if the user added a parameter to debug the app manager
         should_debug_app_manager = Debug.should_debug_app_manager()
 

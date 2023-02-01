@@ -51,11 +51,8 @@ def get_username(debug=False):
         return pwd.getpwuid(os.getuid())[0]
 
 
-def run_commands(raw_cmds: str, debug:bool=False):
+def run_commands(raw_cmds: str, debug: bool = False):
     """Run commands"""
-    if debug:
-        print("\n- get_username():")
-
     os_name = get_platform_system(debug=debug)
 
     if os_name in ["Windows32bit", "Windows64bit"]:
@@ -70,23 +67,23 @@ def run_commands(raw_cmds: str, debug:bool=False):
                                                      stdout=subprocess.PIPE,
                                                      shell=True)
         out, err = process.communicate(parsed_cmds)
-        print(out.decode("utf-8"))
-        process.kill()
-        return out, err
     else:
         parsed_cmds = bytes(raw_cmds, 'utf8')
 
         # For subprocess.Popen()
         # It's recommended to use fully qualified paths, or
         # some things might be overriden
-        process: subprocess.Popen = subprocess.Popen(["/bin/bash"],
+        process: subprocess.Popen = subprocess.Popen(["/bin/bash", "-c"],
                                                      stdin=subprocess.PIPE,
                                                      stdout=subprocess.PIPE,
                                                      shell=True)
         out, err = process.communicate(parsed_cmds)
+
+    if out:
         print(out.decode("utf-8"))
-        process.kill()
-        return out, err
+    elif err:
+        print(err.decode("utf-8"))
+    return out, err
 
 
 def create_folders_recursively(path: str):
