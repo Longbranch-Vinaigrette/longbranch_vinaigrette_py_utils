@@ -1,7 +1,9 @@
-# sub.dev-tools-utils
+# Devtools Utils
 
-# Notes
+Utility functions and class for the devtools stack.
 
-When using this project as a submodule remember these things:\
-* .gitignore\
-    You must add ".dev-tools" to the .gitignore
+# Requirements
+
+Other submodules required:\
+* sub.process_utils
+* sub.sqlite3-utils

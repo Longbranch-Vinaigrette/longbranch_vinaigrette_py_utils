@@ -126,7 +126,7 @@ class AppManager:
 
             # If the app has no stop command, no pid file, we need to do it the hard way.
             # Search for the app and terminate it(with signal 15)
-            process_utils.kill_all_by_cwd(self.path)
+            process_utils.kill_all_by_cwd_and_subfolders(self.path)
         if self.threaded:
             # I don't think this is necessary, but just in case
             def run_fn():
