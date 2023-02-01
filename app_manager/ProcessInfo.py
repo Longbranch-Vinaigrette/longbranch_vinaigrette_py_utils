@@ -3,6 +3,8 @@
 Added process cwd along with the process info, the command used
 to get the path is a bit slow though.
 
+IMPORTANT: Even if I don't use it, don't remove it unless I make a better version of it.
+
 Reference/s:
 https://realpython.com/python-subprocess/#processes-and-subprocesses
 https://stackoverflow.com/questions/606041/how-do-i-get-the-path-of-a-process-in-unix-linux
