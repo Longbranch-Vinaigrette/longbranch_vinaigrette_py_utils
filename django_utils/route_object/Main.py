@@ -10,13 +10,17 @@ class Main:
     data_dependencies: list = []
     post_fn = None
 
-    def __init__(self, route: str, get_fn=None, post_fn=None, use_json: bool = True):
+    def __init__(self,
+                 route: str,
+                 get_fn=None,
+                 post_fn=None,
+                 mime_type: str = "application/json"):
         self.route = route
         self.get_fn = get_fn
         if post_fn:
             print(f"Settings post fn, for route {route}.")
             self.post_fn = post_fn
-        self.use_json = use_json
+        self.mime_type = mime_type
 
         self.debug = False
 
@@ -36,7 +40,7 @@ class Main:
     def post(self, request: HttpRequest):
         """Make a post request"""
         dj_utils = DjangoUtils(request)
-        if self.use_json:
+        if self.mime_type == "application/json":
             data = dj_utils.validate_json_content_type(request)
 
             # If there is "debug" in data it means that there was an error
@@ -84,6 +88,9 @@ class Main:
                     }
 
             return dj_utils.get_json_response(data)
+        elif self.mime_type == "plain/text":
+            # This is the mime we're gonna use for arbitrary code execution
+            pass
         else:
             msg = "The server has no support for its own format(internal error)."
             print(msg)
@@ -96,7 +103,7 @@ class Main:
     def get(self, request: HttpRequest):
         """Make a get request"""
         dj_utils = DjangoUtils(request)
-        if self.use_json:
+        if self.mime_type == "application/json":
             data = dj_utils.validate_accept_json()
 
             # If there is "debug" in data it means that there was an error
