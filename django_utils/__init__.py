@@ -19,8 +19,8 @@ def validate_json_content_type(request: HttpRequest):
             if request.headers["Content-Type"] == "application/json":
                 return {}
             else:
-                msg = f"Content-Type not supported, given " \
-                      f"Content-Type: {request.headers['Content-Type']}"
+                msg = f"The expected Content-Type was application/json, but " \
+                      f"{request.headers['Content-Type']} was given"
                 return Debug(msg, error=True, state="error") \
                     .get_full_message()
         else:

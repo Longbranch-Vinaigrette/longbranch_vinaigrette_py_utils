@@ -6,6 +6,25 @@ from ...django_utils import DjangoUtils
 from ...Debug import Debug
 
 
+def validate_plain_text_content_type(request: HttpRequest):
+    """Validate if the Content-Type of the request is plain/text"""
+    try:
+        if request.headers["Content-Type"] == "text/plain":
+            return True
+        else:
+            msg = f"Expected Content-Type of text/plain, given " \
+                  f"Content-Type: {request.headers['Content-Type']}"
+            return Debug(msg, error=True, state="error") \
+                .get_full_message()
+    except Exception as ex:
+        print("Exception: ")
+        print(ex)
+        return Debug(f"Unknown error when trying to validate that the Content-Type "
+                     f"is plain/text, error: {str(ex)}.", error=True,
+                     state="error") \
+            .get_full_message()
+
+
 class Main:
     data_dependencies: list = []
     post_fn = None
@@ -40,7 +59,15 @@ class Main:
     def post(self, request: HttpRequest):
         """Make a post request"""
         dj_utils = DjangoUtils(request)
+
+        # Check if the request has Content-Type
+        if not ("Content-Type" in request.headers):
+            return Debug("Content-Type not given.", error=True, state="error") \
+                .get_full_message()
+
+        # Now, some routes require a specific Content-Type
         if self.mime_type == "application/json":
+            print("Using default mime_type application/json")
             data = dj_utils.validate_json_content_type(request)
 
             # If there is "debug" in data it means that there was an error
@@ -88,11 +115,19 @@ class Main:
                     }
 
             return dj_utils.get_json_response(data)
-        elif self.mime_type == "plain/text":
+        elif self.mime_type == "text/plain":
             # This is the mime we're gonna use for arbitrary code execution
-            pass
+            # Check that the content type is in fact plain/text
+            result = validate_plain_text_content_type(request)
+
+            # If it's a bool and is True, then it's the correct Content-Type
+            if isinstance(result, bool) and result:
+                return self.post_fn(request)
+            else:
+                # Return the error message
+                return dj_utils.get_json_response(result)
         else:
-            msg = "The server has no support for its own format(internal error)."
+            msg = "There are no routes that support the given Content-Type."
             print(msg)
             data = {
                 "debug": Debug(msg, error=True,
@@ -103,32 +138,23 @@ class Main:
     def get(self, request: HttpRequest):
         """Make a get request"""
         dj_utils = DjangoUtils(request)
-        if self.mime_type == "application/json":
-            data = dj_utils.validate_accept_json()
+        data = dj_utils.validate_accept_json()
 
-            # If there is "debug" in data it means that there was an error
-            if not "debug" in data:
-                try:
-                    if self.get_fn:
-                        return self.get_fn(request)
-                    else:
-                        raise Exception("This route doesn't handle the given method.")
-                except Exception as ex:
-                    print("Exception: ", ex)
-                    data = {
-                        "debug": Debug("Unknown error.", error=True,
-                                       state="error").get_message(),
-                    }
+        # If there is "debug" in data it means that there was an error
+        if not "debug" in data:
+            try:
+                if self.get_fn:
+                    return self.get_fn(request)
+                else:
+                    raise Exception("This route doesn't handle the given method.")
+            except Exception as ex:
+                print("Exception: ", ex)
+                data = {
+                    "debug": Debug("Unknown error.", error=True,
+                                   state="error").get_message(),
+                }
 
-            return dj_utils.get_json_response(data)
-        else:
-            msg = "The server has no support for its own format(internal error)."
-            print(msg)
-            data = {
-                "debug": Debug(msg, error=True,
-                               state="danger").get_message(),
-            }
-            return dj_utils.get_json_response(data)
+        return dj_utils.get_json_response(data)
 
     def handle_request(self, req: HttpRequest):
         """Handle request"""
