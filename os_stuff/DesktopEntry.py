@@ -43,6 +43,12 @@ class DesktopEntry:
         if not os.path.exists(self.autostart_path):
             os.mkdir(self.autostart_path)
 
+    def get_start_on_boot(self):
+        """Get start on boot
+
+        :returns True if start on boot is enabled, false otherwise"""
+        return os.path.exists(self.desktop_entry_path)
+
     def enable_start_on_boot(self):
         """Make the application start when the user boots the device"""
         info = self.get_dot_desktop_file_data()

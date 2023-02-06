@@ -4,11 +4,7 @@ This data is temporary, and must not be submitted to a version hosting service l
 import os
 import json
 
-
-def _get_local_settings_path() -> str:
-    """Get local settings path"""
-    # Django uses local_settings.json, so I can't use it.
-    return f"{os.getcwd()}{os.path.sep}local_data.json"
+filename = "local_data.json"
 
 
 def get_local_settings_path() -> str:
@@ -17,51 +13,86 @@ def get_local_settings_path() -> str:
     A file inside the application folder, where local app data is stored.
     If it doesn't exist, this function will create the file, that's why it's recommended over
     just simply getting the path."""
-    path = _get_local_settings_path()
-
-    if not os.path.exists(path):
-        with open(path, "w+") as f:
-            json.dump(json.dumps({}), f)
-    return path
+    return LocalData().get_local_settings_path()
 
 
 def save_data(new_data: dict, debug: bool = False):
     """Save data without removing old data
 
     Instead, it replaces the old data with the new data if it was given"""
-    data = {}
-    with open(get_local_settings_path(), "r") as f:
-        try:
-            data = json.load(f)
-        except Exception as ex:
-            # Maybe the file doesn't exist
-            print("Couldn't load previous data, exception: ", ex)
-
-    if debug:
-        print("Previous data: ", data)
-        print("Its type: ", type(data))
-
-    # It's a string somehow
-    if isinstance(data, str):
-        data = json.loads(data)
-
-    # Save the filename so it can be loaded somewhere else
-    with open(get_local_settings_path(), "w") as f:
-        data = {
-            **data,
-            **new_data,
-        }
-        if debug:
-            print("Data to store: ", data)
-        json.dump(data, f)
+    return LocalData().save_data(new_data)
 
 
 def load_data():
     """Load data"""
-    data = None
-    with open(get_local_settings_path(), "r") as f:
-        try:
-            data = json.load(f)
-        except Exception as ex:
-            print("Couldn't load previous data, exception: ", ex)
-    return data
+    return LocalData().load_data()
+
+
+class LocalData:
+    """Local data
+
+    It's used for handling the file at ./.local/local_data.json
+    Previously at ./local_data.json"""
+    def __init__(self,
+                 folder: str = os.getcwd(),
+                 debug: bool = False):
+        self.debug = debug
+
+        local_folder = f"{folder}{os.path.sep}.local"
+
+        if not os.path.exists(local_folder):
+            os.mkdir(local_folder)
+
+        self.file_path = f"{local_folder}{os.path.sep}{filename}"
+        if not os.path.exists(self.file_path):
+            # App settings path
+            app_settings = f"{folder}{os.path.sep}settings.json"
+            if os.path.exists(app_settings):
+                # Load data
+                with open(app_settings) as f:
+                    data = json.load(f)
+
+                # Insert the data onto the local file
+                with open(self.file_path, "w") as f:
+                    json.dump(data, f)
+            else:
+                # settings.json doesn't exist
+                # Then we will create an empty file
+                with open(self.file_path, "w") as f:
+                    json.dump({}, f)
+
+    def get_local_settings_path(self):
+        """Get local settings file path"""
+        return self.file_path
+
+    def save_data(self, new_data: dict):
+        """Save data without removing old data
+
+        Instead, it replaces the old data with the new data if it was given"""
+        data = {}
+        # If there's already data there, load it
+        if os.path.exists(self.file_path):
+            with open(self.file_path) as f:
+                data = json.load(f)
+
+        # It's a string somehow
+        if isinstance(data, str):
+            data = json.loads(data)
+
+        # Save the filename so it can be loaded somewhere else
+        with open(self.file_path, "w") as f:
+            data = {
+                **data,
+                **new_data,
+            }
+            json.dump(data, f)
+
+    def load_data(self):
+        """Load local data"""
+        data = None
+        with open(self.file_path, "r") as f:
+            try:
+                data = json.load(f)
+            except Exception as ex:
+                print("Couldn't load previous data, exception: ", ex)
+        return data
