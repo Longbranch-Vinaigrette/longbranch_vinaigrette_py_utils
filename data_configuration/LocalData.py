@@ -35,13 +35,22 @@ class LocalData:
     Previously at ./local_data.json"""
     def __init__(self,
                  folder: str = os.getcwd(),
+                 create_if_not_existent: bool = False,
                  debug: bool = False):
         self.debug = debug
 
         local_folder = f"{folder}{os.path.sep}.local"
 
         if not os.path.exists(local_folder):
-            os.mkdir(local_folder)
+            if create_if_not_existent:
+                os.mkdir(local_folder)
+            else:
+                raise Exception(f"dev_tools_utils/data_configuration/LocalData.py -> "
+                                f"LocalData.__init__(): "
+                                f"The folder: {local_folder} doesn't exist.")
+        
+        # If the folder does exist, it's highly likely that it was my intervention
+        # therefore we don't need to check create_if_not_existent any further.
 
         self.file_path = f"{local_folder}{os.path.sep}{filename}"
         if not os.path.exists(self.file_path):
