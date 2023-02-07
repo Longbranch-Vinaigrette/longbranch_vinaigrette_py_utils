@@ -48,7 +48,7 @@ class LocalData:
                 raise Exception(f"dev_tools_utils/data_configuration/LocalData.py -> "
                                 f"LocalData.__init__(): "
                                 f"The folder: {local_folder} doesn't exist.")
-        
+
         # If the folder does exist, it's highly likely that it was my intervention
         # therefore we don't need to check create_if_not_existent any further.
 
