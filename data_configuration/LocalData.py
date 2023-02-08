@@ -13,19 +13,19 @@ def get_local_settings_path() -> str:
     A file inside the application folder, where local app data is stored.
     If it doesn't exist, this function will create the file, that's why it's recommended over
     just simply getting the path."""
-    return LocalData().get_local_settings_path()
+    return LocalData(create_if_not_existent=True).get_local_settings_path()
 
 
 def save_data(new_data: dict, debug: bool = False):
     """Save data without removing old data
 
     Instead, it replaces the old data with the new data if it was given"""
-    return LocalData().save_data(new_data)
+    return LocalData(create_if_not_existent=True).save_data(new_data)
 
 
 def load_data():
     """Load data"""
-    return LocalData().load_data()
+    return LocalData(create_if_not_existent=True).load_data()
 
 
 class LocalData:
