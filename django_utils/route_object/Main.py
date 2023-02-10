@@ -37,7 +37,6 @@ class Main:
         self.route = route
         self.get_fn = get_fn
         if post_fn:
-            print(f"Settings post fn, for route {route}.")
             self.post_fn = post_fn
         self.mime_type = mime_type
 

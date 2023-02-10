@@ -9,7 +9,7 @@ import os
 import subprocess
 from threading import Thread
 
-from ... import process_utils
+from ... import py_proces_utils as process_utils
 
 from ..data_configuration.ProjectInfo import ProjectInfo
 from ..dbs.RepositorySettings import RepositorySettings

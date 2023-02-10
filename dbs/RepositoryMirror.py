@@ -1,4 +1,4 @@
-from ...sqlite3_utils import Sqlite3Utils
+from ...py_sqlite3_utils import Sqlite3Utils
 from ..data_configuration import DataLocation, DBPath
 
 
